@@ -318,14 +318,12 @@ black: Low Quality
 
 We've seen that a few chemical elements have relationships with wine quality but haven't found any strong correlation. All of our modelling is based on the assumption the quality notation is trustworthy that there is a direct relationship between the grades and the physicochemical properties.
 
-Regarding the dataset, I found the information gap between the accucary of physicochemical data and the quality scale (graded on a discrete scale from 1 to 10, in practice only from 3 to 8) too be too important. I wished the experts who graded the wines had given more variables to study:
-e.g. perceived acidity, color ... and even taste. 
+Regarding the dataset, I found the information gap between the accucary of physicochemical data and the quality scale (graded on a discrete scale from 1 to 10, in practice only from 3 to 8) to be too important. I wished the experts who graded the wines had given more variables to study:
+e.g. perceived acidity, color..
 
-Even if accurately graded, "Quality" is quite an abstract concept. Are we talking about the quality against some sort of standard ? Given that wines differ from region to region and all of our dataset wines are coming from Portugal, are we talking about the quality for a Portuguese wine of that region, or of quality for all red wines?
+Even if accurately graded, "Quality" is quite an abstract concept. Are we talking about quality against some sort of standard ? Given that wines differ from region to region and all of our dataset wines are coming from Portugal, are we talking about the quality for a Portuguese wine of that region, or of quality for all red wines?
 
-On a regional scale and If our assumptions are true, we may have missed relationships that more complex modeling techniques could put forward.
-
-But I do have concerns regarding a theorical global wine grading using physicochemical data, it seems that people who buy Bordeaux are probably not looking for the same experience as people buying Argentine wine. A great argentine wine taste different than a great Bordeaux. So even assuming that it is possible to accurately represent quality or taste through physicochemical data, it seems likely that what is considered "great" would differ in physicochemical terms depending on the region.
+On a regional scale and If our assumptions are true, we may have missed relationships that more complex modeling techniques could put forward. But I do have concerns regarding a theorical global wine grading using physicochemical data, it seems that people who buy Bordeaux are probably not looking for the same experience as people buying Argentine wine. A great argentine wine taste different than a great Bordeaux. So even assuming that it is possible to accurately represent quality or taste through physicochemical data, it seems likely that what is considered "great" could differ in physicochemical terms depending on the region.
 
 ------------------------------------------------
 
