@@ -1,0 +1,276 @@
+# EDA with R: Red Wine Quality Dataset
+by Benjamin Soukiassian
+
+Exploratory Data Analysis with R on a Red Wine quality dataset. 
+
+Part of the Data Analysis Nanodegree by Udacity.
+
+## 1.Exploration
+
+Let's load our csv file and have a look at the dimension of the dataset
+```{r}
+library(ggplot2)
+wine <- read.csv('wineQualityReds.csv')
+dim(wine)
+```
+We have 1599 observations of 13 variables. Let's now have a look at the structure and variables types of the dataset.
+```{r}
+str(wine)
+```
+
+All of the relevant variables are numerical except the quality variable which are integers. By looking at the dataset reference file, we learn that the quality score is graded within a 0 to 10 interval. We can deduce that quality score is a discrete variable, given its integer type.
+
+Let's take a look at the summary of the data for the quality variable.
+```{r}
+summary(wine$quality)
+```
+
+Our min quality score is 3 while our max is 8, which is a bit suprising given the 1 to 10 interval.
+we have a mean of 5.636 and median at 6.
+
+Let take a look at a box plot:
+
+```{r}
+ggplot(aes(x="Wine", y=quality), data=wine) +
+  geom_boxplot() +
+  stat_summary(fun.y = mean, geom = "point", shape = 4)
+```
+
+50% of the bottles are graded between 5 and 6, which considering the 1 to 10 scale
+seem quite concentrated. We have a few outliers at 3 and 8 (min and max values) but most of the values fall between 4 and 7.
+
+To get a better sense of this concentration
+Let's plot the data as a histogram of frequencies.
+
+```{r}
+ggplot(aes(x=quality), data=wine) + 
+  geom_histogram(binwidth = 0.5) +
+  scale_x_continuous(breaks = seq(1,10,1)) +
+  scale_y_continuous(breaks = seq(0, 650, 50))
+```
+
+The frequency distribution is indeed concentrated around 5 and 6.
+It also appear to be a little skewed toward the right (upper quality).
+
+The obvious interesting question regarding this dataset is going to be to try to find which variables are correlated with the quality notation. This question imply the assumption that this notation is trustworthy.
+
+Let's go back to our dataset attributes.
+```{r}
+str(wine)
+```
+
+The dataset provides us with a number of chemical elements which were obtained through physicochemical tests. We have for instance the percent of alcohol, the density, the pH or different measures of acidity.
+
+Instead of computing each pair of variables separately, let's create a scatterplot matrix to get a sense of which attributes are worth exploring further.
+
+```{r eval=FALSE}
+library(GGally)
+ggpairs(wine, 
+        lower = list(
+          continuous = "smooth",
+          combo = "facetdensity",
+          mapping = aes(color=quality)
+          )
+        )
+```
+
+**[Bigger version of the image](ggpair-matrix.png)**
+
+Thanks to the scatterplot matrix, we are able to get a sense of the relationship between each pair of variables.
+One of the first thing that visually jumps out is that there do not seem to have any "very strong" relationship between pairs of variables.
+But a few pairs appear to have interesting relationships nonetheless. For instance, by looking at the lower part of the plots,
+we see that citric.acid appear to have a positive relationship with 
+fixed.acidity, which we can assert by looking at the corresponding 
+correlation coefficient of 0.672 (Strong relationship).
+However, citric.acid seems to have a negative relationship with volatile acidity.
+Corr: -0.552 (Moderate).
+
+We also see that pH has a negative relationship with both fixed.acidity (-0.683) 
+and citric.acid (-0.542) which makes sense because a low pH means more acidity.
+
+We can see thanks to the diagonal frequency polygons plots that both density and pH values seem to follow an approximatively normal distribution while most of the other chemical attributes are positively skewed.
+
+But let's focus on the plots between the different chemical attributes and quality.
+First, by looking at the correlation coefficients at the far right, we see that
+alcohol degree is the most attribute most correlated with quality, which I must admit I find quite surprising.
+The second is volatile acidity.
+with a negative correlation of -0.391
+
+### Alcohol
+
+Let's start by plotting percent of alcohol against quality.
+
+```{r}
+ggplot(aes(quality, alcohol), data = wine) +
+  geom_point()
+```
+
+It is quite hard to see anything with the discrete quality data.
+Let's add some noise to the data with jitter.
+```{r}
+ggplot(aes(quality, alcohol), data = wine) + 
+  geom_jitter(alpha=1/2, width = 1.8, height = 0.2)
+```
+
+There is definitely not a negative relationship between both variables,
+There could be a light positive relationship but it's still hard to grasp.
+Let's add a mean line.
+
+```{r}
+ggplot(aes(quality, alcohol), data = wine) + 
+  geom_jitter(alpha=1/2,  width = 1.8, height = 0.2) +
+  stat_summary(fun.y = mean, color="orange", geom="line", size = 1)
+```
+
+The mean variable shows a positive relationship, but by looking at the raw data the relationship do not seem very strong. 
+We can compute a Pearson correlation coefficient between the two variables to quantify this strength.
+```{r}
+cor.test(wine$quality, wine$alcohol, method="pearson")
+```
+
+The correlation coefficient is 0.4762.
+Using the guide that Evans (1996) suggest for different r intervals
+this value is considered to be moderate.
+
+So the percent of alcohol is moderately correlated to quality, 
+but it probably does not alone account for the total variation in wine quality.
+Thankfully, we still have other attributes to look at.
+
+### Volatile acidity
+
+Volatile acidity (VA) is a measure of the wine’s volatile (or gaseous) acids. 
+The primary volatile acid in wine is acetic acid, which is also 
+the primary acid associated with the smell and taste of vinegar.
+So it is is generally considered to be a spoilage product but apparently some winemakers seek a low or barely detectible level to add to the perceived complexity of a wine.
+
+```{r}
+library(gridExtra)
+summary(wine$volatile.acidity)
+
+plot1 <- ggplot(aes(x="Wine", y=volatile.acidity), data=wine) +
+  geom_boxplot() +
+  stat_summary(fun.y = mean, geom = "point", shape = 4)
+
+plot2 <- ggplot(aes(volatile.acidity), data=wine) +
+  geom_histogram(binwidth = 0.02)
+
+grid.arrange(plot1, plot2, ncol=2)
+```
+
+The distribution is positively skewed and has a few outliers.
+Let's take a look at the relationship with quality, also adding the same mean line previously used.
+
+```{r}
+ggplot(aes(quality, volatile.acidity), data = wine) +
+  geom_jitter(alpha=1/2, width = 2) +
+  stat_summary(fun.y=mean, colour="orange", geom="line", size = 1) 
+```
+
+We can definitely see a negative relationship between the variables, but as with alcohol, it does not seem really strong.
+```{r}
+cor.test(wine$quality, wine$volatile.acidity, method="pearson")
+```
+And indeed the -0.39 Pearson Correlation coefficient is considered weak, nearly moderate.
+
+But since alcohol and volatile acidity are still the variables with the biggest relationship to quality, let's try to plot them againts each other while adding quality as a third variable.
+
+```{r}
+wine$quality.factor <- as.factor(wine$quality)
+ggplot(aes(alcohol, volatile.acidity), data = wine) +
+  geom_point(aes(color=quality.factor))
+```
+
+The best wines appear to be mostly located in the lower right of the plot and the worst higher on the left. But there are so many middle range wine (graded 5 and 6, colored green and blue) with quite a important dispersion that it's hard to see clearly the wines graded higher or lower on the quality scale.
+
+Let's divide our quality notation data into three groups : Low, Medium and High and plot only the Low and High groups.
+
+
+```{r}
+wine$quality.factor <- factor(wine$quality, 
+                        levels=c(3,4,5,6,7,8),                            
+                        labels=c("Low","Low","Medium","Medium","High","High"))
+
+ggplot(aes(alcohol, volatile.acidity), 
+       data = subset(wine, quality > 6 | quality < 5)) +
+  geom_point(aes(color=quality.factor))
+```
+
+This is visually much better, while overlapped the two groups fall more
+
+
+### Bonus 
+
+Althought in practice it doesn't make much sense since the data is already labelled, I wonder how an unsupervised clustering algorithm like K-mean would cluster the Low-High data.
+
+```{r}
+subs <- subset(wine, quality > 6 | quality < 5)
+m = as.matrix(cbind(subs$alcohol, subs$volatile.acidity), ncol=2)
+
+cl=(kmeans(m, 2, iter.max=1, nstart=1))
+subs$cluster=factor(cl$cluster)
+centers=as.data.frame(cl$centers)
+
+ggplot(data=subs, aes(alcohol, volatile.acidity)) + 
+ geom_point(aes(color=cluster)) +
+ geom_point(data=centers, aes(x=V1,y=V2, color="Center")) +
+ geom_point(data=centers, aes(x=V1,y=V2, color="Center"), size=22, alpha=.1,
+            show.legend = FALSE)
+```
+
+
+
+
+------------------------------------
+# other stuff
+
+```{r}
+wine$quality.factor <- as.factor(wine$quality)
+ggplot(aes(alcohol, volatile.acidity), data = wine) +
+  geom_point(aes(color=quality.factor))
+```
+
+
+to try:
+convert quality to factor then facet wrap two measures by quality
+
+```{r}
+wine$quality.factor <- factor(wine$quality, 
+                        levels=c(3,4,5,6,7,8),                            
+                        labels=c("Low","Low","Medium","Medium","High","High"))
+
+ggplot(aes(alcohol, volatile.acidity), data=wine )+
+  geom_point(aes(color=quality)) +
+  facet_wrap(~ quality.factor)
+```
+
+------------------------------------
+
+
+## 2.Final plots and summary
+*You will select three plots from your analysis to polish and share in this section. The three plots should show different trends and should be polished with appropriate labels, units, and titles (see the Project Rubric for more information).*
+
+### Volatile Acidity & Alcohol
+```{r}
+ggplot(aes(quality, volatile.acidity), data = wine) +
+  geom_jitter(alpha=1/3, width = 2, aes(color="blue")) +
+  stat_summary(fun.y=mean, colour="blue", geom="line", size = 1)
+```
+
+
+
+
+## 3.Reflection
+*This should contain a few sentences about your struggles, successes, and ideas for future exploration on the data set (see the Project Rubric for more information).*
+
+### Conclusion
+Does the data comes from one region ? if yes :
+It's important to note that the dataset comes from one region,
+objective measures of quality are different depending on regions and types of wines.
+
+### Ressources used:
+- https://en.wikipedia.org/wiki/PH
+- http://extension.psu.edu/food/enology/wine-production/wine-made-easy-fact-sheets/volatile-acidity-in-wine
+- https://winemakermag.com/676-the-perils-of-volatile-acidity
+- http://waterhouse.ucdavis.edu/whats-in-wine/volatile-acidity
+- http://www.statstutor.ac.uk/resources/uploaded/pearsons.pdf
+- https://ggobi.github.io/ggally/ggpairs.html
