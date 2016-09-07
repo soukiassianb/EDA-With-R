@@ -207,7 +207,7 @@ cor.test(wine$quality, wine$volatile.acidity, method="pearson")
 
 And indeed the -0.39 Pearson Correlation coefficient is considered weak, nearly moderate.
 
-### Sulphates
+#### Sulphates
  
 Sulphates is the third variable most correlated with quality. 
 ```{r}
@@ -310,6 +310,8 @@ ggplot(aes(quality, alcohol), data = wine) +
 
 ```
 
+This plot shows the relationship between Alcohol and quality grade. While the raw data is quite dispersed, we are able by to assert the positive nature of the relationship by plotting mean, median and quartiles lines.
+
 **Volatile Acidity vs Alcohol**
 ```{r}
 ggplot(aes(alcohol, volatile.acidity), data = low_high_wines) +
@@ -323,18 +325,23 @@ ggplot(aes(alcohol, volatile.acidity), data = low_high_wines) +
   scale_colour_brewer(palette="Set1") 
 ```
 
+This scatterplot shows the relationship between Alcohol and Volatile acidity while coloring the data points by one of the two "Low" or "High" quality groups. I choosed to plot the two most extremes groups because the medium group has a lot of dispersed data points, making it more difficult to see the underlying distribution. We see on the plot that the "Low" quality wines tend to be higher on the volatile acidity scale than the "High" quality wines, while the "High" quality wines are higher than the "Low"" on the alcohol scale. The two groups are overlapping.
+
+
 **3D Scatterplot (Volatile Acidity, Sulphates, Alcohol)**
 ```{r  message=FALSE, warning=FALSE}
 attach(low_high_wines)
 scatterplot3d(volatile.acidity, sulphates, alcohol, pch = 19,
               main = "3D Scatterplot (Volatile Acidity, Sulphates, Alcohol)", 
               color = (22.7*as.numeric(quality.group)), box = FALSE, 
-              cex.lab	= 1.2, cex.symbols=0.7, angle=110)
+              cex.lab	= 1.2, cex.symbols=0.7, angle=120)
 ```
 
 **Legend:**
 blue: High Quality
 pink: Low Quality
+
+This scatterplot is a 3D representation of the relationship between alcohol, sulphates and volatile acidity for the "Low-High" data points. The motivation for the plot is to try to see if we are able to get natural clusters of the two extremes quality groups by plotting the 3 most influencial variables for quality. We are indeed able to see clusters but they are still overlapping.
 
 ## 3.Reflection
 
